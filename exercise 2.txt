@@ -1,0 +1,21 @@
+Optimized Code- Exercise - 2
+Problem Statement: Inefficient querying of child items(Using two SOQL Queries).
+Solution Implemented: Merge both SOQL queries into single statement and differenciate in the if block.
+
+trigger accountTrigger on Account (before delete, before insert, before update) {
+	List<Account> accountWithBothOpportunity = [select id, name, (select id, name, closedate, stagename from Opportunities
+	where accountId IN :Trigger.newMap.keySet() and StageName IN ('Closed - Lost','Closed - Won'))
+	from Account where Id IN : Trigger.newMap.keySet()];
+
+	for(Account a : accountWithBothOpportunity){
+		for(Opportunity o: a.Opportunities){
+			if(o.stageName == 'Closed - Lost'){
+				System.debug('Do more logic here...');
+			}
+
+			else if(o.stageName == 'Closed - Won')
+				System.debug('Do more logic here...');
+			}
+		}
+	}
+}
