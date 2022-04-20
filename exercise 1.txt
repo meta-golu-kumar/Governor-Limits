@@ -3,18 +3,14 @@ Optimized Code – Exercise - 1
 Problem Statement: Inefficient querying of child items,DML calls on single sObjects.
 Solution Implemented: Fetching all contacts associated with Account and Update in Bulk.
 
-trigger accountTestTrigger on Account (before insert, before update) {
-	List<Account> accountList = [Select Id ,(Select  id, salutation, firstname, lastname, email
-	from Contacts) From Account Where Id IN : :Trigger.newMap.KeySet()];
-	
-	List<Contact> contactListToBeUpdated = new List<Contact>();
-	for(Account a:  accountList) {
-		for(Contact c : a.contacts){
-			System.debug('Contact Id[' + c.Id + '], FirstName[' + c.firstname + '],
-			LastName[' + c.lastname +']');
-			c.Description=c.salutation + ' ' + c.firstName + ' ' + c.lastname;
-			contactListToBeUpdated.add(c);
-		}
+trigger accountTestTrigger on Account (after insert, before update) {
+	List<Contact> contacts = [Select  id, salutation, firstname, lastname, email
+	from Contact where accountId IN : Trigger.New];
+
+    
+	for(Contact c:  contacts) {
+		System.debug('Contact Id[' + c.Id + '], FirstName[' + c.firstname + '],LastName[' + c.lastname +']');
+		c.Description=c.salutation + ' ' + c.firstName + ' ' + c.lastname;
 	}
-	update contactListToBeUpdated;
+	update contacts;
 }
